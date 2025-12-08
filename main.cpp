@@ -1,211 +1,251 @@
 #include <iostream>
-#include <cstddef>
-namespace top
-{
-  struct p_t
-  {
-    int x, y;
+
+namespace top {
+  struct p_t {
+    int x,y;
   };
-  struct IDraw
-  {
-    virtual ~IDraw() = default;
-    virtual p_t begin() const = 0;
-    virtual p_t next(p_t) const = 0;
-  };
+
   bool operator==(p_t a, p_t b)
   {
     return a.x == b.x && a.y == b.y;
   }
+
   bool operator!=(p_t a, p_t b)
   {
-    return a.x != b.x || a.y != b.y;
+    return !(a == b);
   }
-  struct Dot: IDraw
-  {
+
+  struct Frame_t {
+    p_t leftBott, rightTop;
+  };
+
+  struct IDraw {
+    virtual p_t begin() const = 0;
+    virtual p_t next(p_t p) const = 0;
+    virtual ~IDraw() = default;
+  };
+
+  struct Dot : IDraw {
+    Dot(int x, int y) : IDraw(), o{x,y} {}
+    ~Dot() override = default;
     p_t begin() const override;
-    p_t next(p_t) const override;
+    p_t next(p_t p) const override;
     p_t o;
-    Dot(int x, int y);
-    explicit Dot(p_t dd);
   };
-  struct frame_t
-  {
-    p_t left_bot;
-    p_t right_tot;
-  };
-  void make_f(IDraw ** b, size_t k);
-  void get_points(IDraw * b, p_t ** ps, size_t & s);
-  frame_t build_frame(const p_t * pts, size_t s);
-  char * build_canvas(frame_t f);
-  void paint_canvas(char * cnv, frame_t fr, const p_t * ps, size_t k, char f);
-  void print_canvas(const char * cnv, frame_t fr);
-  struct VLine : IDraw
-  {
+  void extend(p_t** ps, size_t s, p_t p);
+  void make_f(IDraw** f, size_t k);
+  size_t getPoints(IDraw* f, p_t** ps, size_t& s);
+  Frame_t buildFrame(const p_t* ps, size_t s);
+  char* buildCanvas(Frame_t fr);
+  void paintCanvas(char* cnv, Frame_t fr, const p_t* ps , size_t k, char f);
+  void printCanvas(char* cnv, Frame_t fr);
+  struct VLine : IDraw {
     VLine(int x, int y, int len);
     p_t begin() const override;
     p_t next(p_t p) const override;
     p_t start;
     int length;
   };
-  struct HLine : IDraw
-  {
+
+  struct HLine : IDraw {
     HLine(int x, int y, int len);
     p_t begin() const override;
     p_t next(p_t p) const override;
     p_t start;
     int length;
   };
-  struct Square : IDraw
-  {
-    Square(int x, int y, int len);
+
+  struct Square: IDraw {
+    Square(int x, int y, int l);
+    Square(p_t p, int l);
     p_t begin() const override;
     p_t next(p_t p) const override;
     p_t start;
-    int length;
+    int len;
   };
+
 }
+
+
+
 int main()
 {
-  using namespace top;
-  IDraw * f[3] = {};
-  p_t * p = nullptr;
-  char * cnv = nullptr;
+  top::IDraw* f[3] = {};
+  top::p_t* p = nullptr;
   size_t s = 0;
-  int err = 0;
-  try
-  {
-    make_f(f, 3);
-    for (size_t i = 0; i < 3; ++i)
-    {
-      get_points(f[i], & p, s);
+  char* cnv = nullptr;
+  int statusCode = 0;
+  try {
+    top::make_f(f, 3);
+    for (size_t i = 0; i < 3; ++i) {
+      top::getPoints(f[i], &p, s);
     }
-    frame_t fr = build_frame(p, s);
-    cnv = build_canvas(fr);
-    paint_canvas(cnv, fr, p, s, '#');
-    print_canvas(cnv, fr);
+    top::Frame_t fr = top::buildFrame(p, s);
+    cnv = top::buildCanvas(fr);
+    top::paintCanvas(cnv, fr, p, s, 'o');
+    top::printCanvas(cnv, fr);
+  } catch(...) {
+    statusCode = 1;
   }
-  catch(...)
-  {
-    err = 1;
-  }
-  delete[] f[0];
-  delete[] f[1];
-  delete[] f[2];
+
+  delete f[0];
+  delete f[1];
+  delete f[2];
   delete[] p;
   delete[] cnv;
-  return err;
+
+  return statusCode;
 }
-void extend(top::p_t ** pts, size_t s, top::p_t p)
-{
-  top::p_t * res = new top::p_t [s + 1];
-  for (size_t i = 0; i < s; ++i)
-  {
-    res[i] = (*pts)[i];
-  }
-  res[s] = p;
-  delete[] * pts;
-  *pts = res;
-}
-size_t top::points(const IDraw & d, p_t ** pts, size_t s)
-{
-  p_t p = d.begin();
-  extend(pts, s, p);
-  size_t delta = 1;
-  while(d.next(p) != d.begin())
-  {
-    p = d.next(p);
-    extend(pts, s + delta, p);
-    ++delta;
-  }
-  return delta;
-}
-top::Dot::Dot(int x, int y):
-IDraw(), o{x, y}
-{}
-top::p_t top::Dot::begin() const 
-{
-  return o;
-}
-top::p_t top::Dot::next(p_t) const
+
+top::p_t top::Dot::next(p_t p) const
 {
   return begin();
 }
-void top::make_f(IDraw ** f, size_t k)
+
+void top::make_f(IDraw** f, size_t k)
 {
+  f[0] = new Dot(0, 0);
+  f[1] = new Dot(-1, -5);
+  f[2] = new Dot(7, 7);
 }
-void top::get_points(IDraw * b, p_t ** ps, size_t & s)
+
+void top::extend(p_t** ps, size_t s, p_t p)
 {
+  size_t upd_s = s + 1;
+  top::p_t* res = new top::p_t[upd_s];
+  for (size_t i = 0; i < s; ++i) {
+    res[i] = (*ps)[i];
+  }
+  res[s] = p;
+  delete[] *ps;
+  *ps = res;
 }
-top::frame_t top::build_frame(const p_t * pts, size_t s)
+
+size_t top::getPoints(IDraw* f, p_t** ps, size_t& s)
 {
-  if (!s)
-  {
-    throw std::logic_error("bad size");
+  p_t p = f->begin();
+  extend(ps, s, p);
+  size_t delta = 1;
+  while (f->next(p) != f->begin()) {
+    p = f->next(p);
+    extend(ps, s+delta, p);
+    delta++;
   }
-  int minx = pts[0].x, maxx = minx;
-  int miny = pts[0], maxy = miny;
-  for (size_t i = 1; i < s; ++i)
-  {
-    minx = std::min(minx, pts[i].x);
-    maxx = std::max(maxx, pts[i].x);
-    miny = std::min(miny, pts[i].y);
-    maxy = std::max(maxy, pts[i].y);
+   return delta;
+}
+
+top::Frame_t top::buildFrame(const p_t* ps, size_t s)
+{
+  if (!s) {
+    throw std::logic_error("");
   }
-  p_t aa{minx, miny};
-  p_t bb{maxx, maxy};
+  int minx = ps[0].x, maxx = ps[0].x;
+  int miny = ps[0].y, maxy = ps[0].y;
+  for (size_t i = 1; i < s; ++i) {
+    minx = std::min(minx, ps[i].x);
+    maxx = std::max(maxx, ps[i].x);
+    miny = std::min(miny, ps[i].y);
+    maxy = std::max(maxy, ps[i].y);
+  }
+  p_t aa {minx, miny};
+  p_t bb { maxx, maxy};
   return {aa, bb};
 }
-char * top::build_canvas(frame_t fr)
+
+char* top::buildCanvas(Frame_t fr)
 {
 }
-void top::paint_canvas(char * cnv, frame_t fr, const p_t * ps, size_t k, char f)
+
+void top::paintCanvas(char* cnv, Frame_t fr, const p_t* ps, size_t k, char f)
 {
 }
-void top::print_canvas(const char * cnv, frame_t fr)
+
+void top::printCanvas(char* cnv, Frame_t fr)
 {
 }
+
+top::p_t top::Dot::begin() const
+{
+  return o;
+}
+
 top::VLine::VLine(int x, int y, int len) : IDraw(), start{x,y}, length(len)
-{}
+{
+  if (len == 0) {
+    throw std::logic_error("USER invalid");
+  }
+}
+
 top::p_t top::VLine::begin() const
 {
   return start;
 }
+
 top::p_t top::VLine::next(p_t p) const
 {
-  if (p.y == start.y + length) {
+  if (p.y == start.y + length - 1) {
     return start;
   }
-  return p_t{start.x, p.y + 1};
+  if (length > 0) {
+    return p_t{start.x, p.y + 1};
+  }
+  return p_t{start.x, p.y - 1};
 }
+
 top::HLine::HLine(int x, int y, int len) : IDraw(), start{x, y}, length(len)
-{}
+{
+  if (len == 0) {
+    throw std::logic_error("USER invalid");
+  }
+}
+
 top::p_t top::HLine::begin() const
 {
   return start;
 }
+
 top::p_t top::HLine::next(p_t p) const
 {
-  if (p.x == start.x + length) {
+  if (p.x == start.x + length - 1) {
     return start;
   }
-  return p_t{p.x + 1, start.y };
+  if (length > 0) {
+    return p_t{p.x + 1, start.y };
+  }
+  return p_t{p.x - 1, start.y };
 }
-top::Square::Square(int x, int y, int len) : IDraw(), start{x, y}, length(len)
-{}
+
+top::Square::Square(int x, int y, int l):
+  IDraw(),
+  start{x, y},
+  len(l)
+{
+  if (len <= 0) {
+    throw std::invalid_argument("lenght can not be  <= 0");
+  }
+}
+
+top::Square::Square(p_t p, int l)
+{
+  Square(p.x, p.y, l);
+}
+
 top::p_t top::Square::begin() const
 {
   return start;
 }
+
 top::p_t top::Square::next(p_t p) const
 {
-  if (p.y == start.y && p.x < start.x + length) {
-    return p_t{p.x + 1, p.y};
-  } else if (p.x == start.x + length && p.y < start.y + length) {
-    return p_t{p.x, p.y + 1};
-  } else if (p.y == start.y + length && p.x > start.x) {
-    return p_t{p.x - 1, p.y};
-  } else if (p.x == start.x && p.y > start.y) {
-    return p_t{p.x, p.y - 1};
+  if (p.x == start.x && p.y < start.y + len - 1) {
+    return {p.x, p.y + 1};
+  } else if (p.y == start.y + len - 1 && p.x < start.x + len - 1) {
+    return {p.x + 1, p.y};
+  } else if (p.x == start.x + len - 1 && p.y > start.y) {
+    return {p.x, p.y - 1};
+  } else if (p.y == start.y && p.x > start.x) {
+    return {p.x - 1, p.y};
   }
-  return start;
 }
+
+
