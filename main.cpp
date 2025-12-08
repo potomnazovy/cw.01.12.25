@@ -37,6 +37,14 @@ namespace top
   char * build_canvas(frame_t f);
   void paint_canvas(char * cnv, frame_t fr, const p_t * ps, size_t k, char f);
   void print_canvas(const char * cnv, frame_t fr);
+  struct VLine : IDraw
+  {
+    VLine(int x, int y, int len);
+    p_t begin() const override;
+    p_t next(p_t p) const override;
+    p_t start;
+    int length;
+  };
 }
 int main()
 {
