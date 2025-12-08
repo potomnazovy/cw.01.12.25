@@ -81,7 +81,7 @@ namespace top
 int main()
 {
   top::IDraw* f[5] = {};
-  top::p_t* p = new top::p_t [1];
+  top::p_t* p = nullptr;
   size_t s = 0;
   char* cnv = nullptr;
   int statusCode = 0;
@@ -130,10 +130,13 @@ void top::make_f(IDraw** f, size_t k)
 void top::extend(p_t** ps, size_t s, p_t p)
 {
   size_t upd_s = s + 1;
-  p_t* res = new p_t[upd_s];
-  for (size_t i = 0; i < s; ++i) 
+  top::p_t* res = new top::p_t[upd_s];
+  if (s > 0 && *ps != nullptr)
   {
-    res[i] = (*ps)[i];
+    for (size_t i = 0; i < s; ++i) 
+    {
+      res[i] = (*ps)[i];
+    }
   }
   res[s] = p;
   delete[] *ps;
