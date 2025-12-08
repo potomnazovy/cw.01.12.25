@@ -53,6 +53,14 @@ namespace top
     p_t start;
     int length;
   };
+  struct Square : IDraw
+  {
+    Square(int x, int y, int len);
+    p_t begin() const override;
+    p_t next(p_t p) const override;
+    p_t start;
+    int length;
+  };
 }
 int main()
 {
