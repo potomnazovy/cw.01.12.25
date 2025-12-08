@@ -45,6 +45,14 @@ namespace top
     p_t start;
     int length;
   };
+  struct HLine : IDraw
+  {
+    HLine(int x, int y, int len);
+    p_t begin() const override;
+    p_t next(p_t p) const override;
+    p_t start;
+    int length;
+  };
 }
 int main()
 {
