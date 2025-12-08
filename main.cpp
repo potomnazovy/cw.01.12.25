@@ -2,7 +2,8 @@
 #include <cstddef>
 
 namespace top {
-  struct p_t {
+  struct p_t 
+  {
     int x, y;
   };
 
@@ -16,17 +17,20 @@ namespace top {
     return !(a == b);
   }
 
-  struct Frame_t {
+  struct Frame_t 
+  {
     p_t leftBott, rightTop;
   };
 
-  struct IDraw {
+  struct IDraw 
+  {
     virtual p_t begin() const = 0;
     virtual p_t next(p_t p) const = 0;
     virtual ~IDraw() = default;
   };
 
-  struct Dot : IDraw {
+  struct Dot : IDraw 
+  {
     Dot(int x, int y) : IDraw(), o{x,y} {}
     ~Dot() override = default;
     p_t begin() const override;
