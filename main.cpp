@@ -1,8 +1,9 @@
 #include <iostream>
-
+#include <cstddef>
+#include <fstream>
 namespace top {
   struct p_t {
-    int x,y;
+    int x, y;
   };
 
   bool operator==(p_t a, p_t b)
@@ -36,9 +37,9 @@ namespace top {
   void make_f(IDraw** f, size_t k);
   size_t getPoints(IDraw* f, p_t** ps, size_t& s);
   Frame_t buildFrame(const p_t* ps, size_t s);
-  char* buildCanvas(Frame_t fr);
+  char* buildCanvas(Frame_t fr, char fill);
   void paintCanvas(char* cnv, Frame_t fr, const p_t* ps , size_t k, char f);
-  void printCanvas(char* cnv, Frame_t fr);
+  void printCanvas(std::ostream& os,const char* cnv, Frame_t fr);
   struct VLine : IDraw {
     VLine(int x, int y, int len);
     p_t begin() const override;
@@ -75,15 +76,16 @@ int main()
   size_t s = 0;
   char* cnv = nullptr;
   int statusCode = 0;
+  std::ofstream os;
   try {
     top::make_f(f, 3);
     for (size_t i = 0; i < 3; ++i) {
       top::getPoints(f[i], &p, s);
     }
     top::Frame_t fr = top::buildFrame(p, s);
-    cnv = top::buildCanvas(fr);
+    cnv = top::buildCanvas(fr, '0');
     top::paintCanvas(cnv, fr, p, s, 'o');
-    top::printCanvas(cnv, fr);
+    top::printCanvas(os, cnv, fr);
   } catch(...) {
     statusCode = 1;
   }
@@ -152,16 +154,49 @@ top::Frame_t top::buildFrame(const p_t* ps, size_t s)
   return {aa, bb};
 }
 
-char* top::buildCanvas(Frame_t fr)
+size_t rows(top::Frame_t fr)
 {
+  return (fr.rightTop.y - fr.leftBott.y + 1);
+}
+size_t cols(top::Frame_t fr)
+{
+  return (fr.rightTop.x - fr.leftBott.x + 1);
+}
+char* top::buildCanvas(Frame_t fr, char fill)
+{
+  char* cnv = new char [rows(fr), cols(fr)];
+  for (size_t i = 0; i < rows(fr) * cols(fr); ++i)
+  {
+    cnv[i] = fill;
+  }
+  return cnv;
 }
 
 void top::paintCanvas(char* cnv, Frame_t fr, const p_t* ps, size_t k, char f)
 {
+  size_t c = cols(fr);
+  for (size_t i = 0; i < k; ++i)
+  {
+    int dx = ps[i].x - fr.leftBott.x;
+    int dy = fr.rightTop.y - ps[i].y;
+    cnv[dy * cols(fr) + dx] = f;
+    if (dx >= 0 && dy >= 0 && (size_t)dx < c && (size_t)dy < rows(fr))
+    {
+      cnv[dy * c + dx] = f;
+    }
+  }
 }
 
-void top::printCanvas(char* cnv, Frame_t fr)
+void top::printCanvas(std::ostream& os, const char* cnv, Frame_t fr)
 {
+  for (size_t i = 0; i < rows(fr); ++i)
+  {
+    for (size_t j = 0; j < cols(fr); ++j)
+    {
+      os << cnv[i * cols(fr) + j];
+    }
+    os << '\n';
+  }
 }
 
 top::p_t top::Dot::begin() const
