@@ -35,7 +35,7 @@ namespace top
   };
   void make_f(IDraw ** b, size_t k);
   void get_points(IDraw * b, p_t ** ps, size_t & s);
-  frame_t build_frame(const p_t * ps, size_t s);
+  frame_t build_frame(const p_t * pts, size_t s);
   char * build_canvas(frame_t f);
   void paint_canvas(char * cnv, frame_t fr, const p_t * ps, size_t k, char f);
   void print_canvas(const char * cnv, frame_t fr);
@@ -136,8 +136,24 @@ void top::make_f(IDraw ** f, size_t k)
 void top::get_points(IDraw * b, p_t ** ps, size_t & s)
 {
 }
-top::frame_t top::build_frame(const p_t * ps, size_t s)
+top::frame_t top::build_frame(const p_t * pts, size_t s)
 {
+  if (!s)
+  {
+    throw std::logic_error("bad size");
+  }
+  int minx = pts[0].x, maxx = minx;
+  int miny = pts[0], maxy = miny;
+  for (size_t i = 1; i < s; ++i)
+  {
+    minx = std::min(minx, pts[i].x);
+    maxx = std::max(maxx, pts[i].x);
+    miny = std::min(miny, pts[i].y);
+    maxy = std::max(maxy, pts[i].y);
+  }
+  p_t aa{minx, miny};
+  p_t bb{maxx, maxy};
+  return {aa, bb};
 }
 char * top::build_canvas(frame_t fr)
 {
