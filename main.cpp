@@ -1,7 +1,8 @@
 #include <iostream>
 #include <cstddef>
 
-namespace top {
+namespace top 
+{
   struct p_t 
   {
     int x, y;
