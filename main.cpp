@@ -104,3 +104,66 @@ top::p_t top::Dot::next(p_t) const
 {
   return begin();
 }
+void top::make_f(IDraw ** f, size_t k)
+{
+}
+void top::get_points(IDraw * b, p_t ** ps, size_t & s)
+{
+}
+top::frame_t top::build_frame(const p_t * ps, size_t s)
+{
+}
+char * top::build_canvas(frame_t fr)
+{
+}
+void top::paint_canvas(char * cnv, frame_t fr, const p_t * ps, size_t k, char f)
+{
+}
+void top::print_canvas(const char * cnv, frame_t fr)
+{
+}
+top::VLine::VLine(int x, int y, int len) : IDraw(), start{x,y}, length(len)
+{}
+top::p_t top::VLine::begin() const
+{
+  return start;
+}
+top::p_t top::VLine::next(p_t p) const
+{
+  if (p.y == start.y + length) {
+    return start;
+  }
+  return p_t{start.x, p.y + 1};
+}
+top::HLine::HLine(int x, int y, int len) : IDraw(), start{x, y}, length(len)
+{}
+top::p_t top::HLine::begin() const
+{
+  return start;
+}
+top::p_t top::HLine::next(p_t p) const
+{
+  if (p.x == start.x + length) {
+    return start;
+  }
+  return p_t{p.x + 1, start.y };
+}
+top::Square::Square(int x, int y, int len) : IDraw(), start{x, y}, length(len)
+{}
+top::p_t top::Square::begin() const
+{
+  return start;
+}
+top::p_t top::Square::next(p_t p) const
+{
+  if (p.y == start.y && p.x < start.x + length) {
+    return p_t{p.x + 1, p.y};
+  } else if (p.x == start.x + length && p.y < start.y + length) {
+    return p_t{p.x, p.y + 1};
+  } else if (p.y == start.y + length && p.x > start.x) {
+    return p_t{p.x - 1, p.y};
+  } else if (p.x == start.x && p.y > start.y) {
+    return p_t{p.x, p.y - 1};
+  }
+  return start;
+}
