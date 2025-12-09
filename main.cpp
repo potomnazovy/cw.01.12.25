@@ -64,7 +64,7 @@ namespace top
     p_t start;
     int length;
   };
-
+  
   struct Square: IDraw 
   {
     Square(int x, int y, int l);
@@ -74,9 +74,19 @@ namespace top
     p_t start;
     int len;
   };
+
+  size_t rows(Frame_t fr);
+  size_t cols(Frame_t fr);
 }
 
-
+size_t top::rows(Frame_t fr)
+{
+  return (fr.rightTop.y - fr.leftBott.y + 1);
+}
+size_t top::cols(Frame_t fr)
+{
+  return (fr.rightTop.x - fr.leftBott.x + 1);
+}
 
 int main()
 {
@@ -133,7 +143,7 @@ void top::extend(p_t** ps, size_t s, p_t p)
   top::p_t* res = new top::p_t[upd_s];
   if (s > 0 && *ps != nullptr)
   {
-    for (size_t i = 0; i < s; ++i) 
+    for (size_t i = 0; i < s; ++i)
     {
       res[i] = (*ps)[i];
     }
@@ -148,7 +158,7 @@ size_t top::getPoints(IDraw* f, p_t** ps, size_t& s)
   p_t p = f->begin();
   extend(ps, s, p);
   size_t delta = 1;
-  while (f->next(p) != f->begin()) 
+  while (f->next(p) != f->begin())
   {
     p = f->next(p);
     extend(ps, s + delta, p);
@@ -159,7 +169,7 @@ size_t top::getPoints(IDraw* f, p_t** ps, size_t& s)
 
 top::Frame_t top::buildFrame(const p_t* ps, size_t s)
 {
-  if (!s) 
+  if (!s)
   {
     throw std::logic_error("");
   }
@@ -177,14 +187,6 @@ top::Frame_t top::buildFrame(const p_t* ps, size_t s)
   return {aa, bb};
 }
 
-size_t rows(top::Frame_t fr)
-{
-  return (fr.rightTop.y - fr.leftBott.y + 1);
-}
-size_t cols(top::Frame_t fr)
-{
-  return (fr.rightTop.x - fr.leftBott.x + 1);
-}
 char* top::buildCanvas(Frame_t fr, char fill)
 {
   char* cnv = new char [rows(fr) * cols(fr)];
