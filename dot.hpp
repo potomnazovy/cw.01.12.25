@@ -6,7 +6,7 @@ namespace top
 {
   struct Dot : IDraw 
   {
-    Dot(int x, int y) : IDraw(), o{x,y} {}
+    Dot(int x, int y);
     ~Dot() override = default;
     p_t begin() const override;
     p_t next(p_t p) const override;
