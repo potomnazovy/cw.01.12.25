@@ -2,6 +2,7 @@
 #define IDRAW_HPP
 #include <cstddef>
 #include "geom.hpp"
+
 namespace top
 {
   struct IDraw

@@ -2,6 +2,7 @@
 #define CANVAS_HPP
 #include <iosfwd>
 #include "geom.hpp"
+
 namespace top
 {
   char* buildCanvas(Frame_t fr, char fill);

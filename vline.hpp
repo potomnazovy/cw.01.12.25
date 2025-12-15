@@ -2,6 +2,7 @@
 #define VLINE_HPP
 #include "IDraw.hpp"
 #include <stdexcept>
+
 namespace top {
   struct VLine : IDraw {
     VLine(int x, int y, int len);
