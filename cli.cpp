@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cstddef>
 #include <cctype>
+#include <iomanip>
+#include <fstream>
+#include <cassert>
 
 void hi()
 {
@@ -14,7 +17,23 @@ bool is_space(char c)
 
 std::istream& getword(std::istream& is, char* word, size_t k, bool(*c)(char))
 {
-  
+  assert(k > 0 && "k must be greater");
+  if (!k || !word)
+  {
+    throw std::logic_error("bad buffer");
+  }
+  is >> std::noskipws;
+  size_t i = 0;
+  for (char next = 0; is >> next && !c(next) && i < k - 1; ++i)
+  {
+    is >> next;
+    word[i] = next;
+  }
+  if (i == k)
+  {
+    is.clear(is.rdstate() | std::ios::failbit);
+  }
+  return is >> std::skipws;
 }
 
 size_t match(const char* word, const char* const* words, size_t k)
