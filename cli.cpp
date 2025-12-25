@@ -5,15 +5,28 @@
 #include <fstream>
 #include <cassert>
 #include <cstring>
+#include <limits>
 
-void hi()
+void skipline(std::istream &)
 {
-  std::cout << "<HI!>\n";
+  using lim_t = std::numeric_limits< std::streamsize >;
+  std::cin.ignore(lim_t::max(), '\n');
 }
 
-void hello()
+void hi(std::ostream & os, std::istream & is)
 {
-  std::cout << "<HELLO!>\n";
+  unsigned int i = 0;
+  if (!(is >> i))
+  {
+    throw std::runtime_error("high expects unsigned int param");
+  }
+  skipline(is);
+  os << "< HI: " << i << " >\n";
+}
+
+void hello(std::ostream & os, std::istream &)
+{
+  os << "<HELLO!>\n";
 }
 
 bool is_space(char c)
@@ -53,10 +66,19 @@ size_t match(const char * word, const char * const * words, size_t k)
   return k;
 }
 
+// struct Cmd
+// {
+//   virtual const char * name() const = 0;
+//   virtual const char * desc() const = 0;
+//   virtual const char * help() const = 0;
+//   virtual void invoke() const = 0;
+// };
+
 int main()
 {
   constexpr size_t cmds_count = 2;
-  void(*cmds[2])() = {hi, hello};
+  using cmd_t = void(*)(std::ostream & os, std::istream &);
+  cmd_t cmds[cmds_count] = {hi, hello};
   const char * const cmds_text[] = {"hi", "hello"};
 
   constexpr size_t bcapacity = 255;
@@ -76,7 +98,19 @@ int main()
       size_t i = match(word, cmds_text, cmds_count);
       if ( i < cmds_count)
       {
-        cmds[i]();
+        try
+        {
+          cmds[i](std::cout, std::cin);
+        }
+        catch (const std::exception & e)
+        {
+          std::cerr << "< INVALID COMMAND: " << e.what() << " >\n";
+          if (std::cin.fail())
+          {
+            std::cin.clear(std::cin.rdstate() ^ std::ios::failbit);
+          }
+        skipline(std::cin);
+        }
       }
       else
       {
