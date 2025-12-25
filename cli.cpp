@@ -13,7 +13,7 @@ void skipline(std::istream &)
   std::cin.ignore(lim_t::max(), '\n');
 }
 
-void hi(std::ostream & os, std::istream & is)
+void next(std::ostream & os, std::istream & is, size_t & context)
 {
   unsigned int i = 0;
   if (!(is >> i))
@@ -21,12 +21,13 @@ void hi(std::ostream & os, std::istream & is)
     throw std::runtime_error("high expects unsigned int param");
   }
   skipline(is);
-  os << "< HI: " << i << " >\n";
+  context = i;
+  os << "< OK >\n";
 }
 
-void hello(std::ostream & os, std::istream &)
+void last(std::ostream & os, std::istream &, size_t & context)
 {
-  os << "<HELLO!>\n";
+  os << "< " << context << " >\n";
 }
 
 bool is_space(char c)
@@ -77,9 +78,11 @@ size_t match(const char * word, const char * const * words, size_t k)
 int main()
 {
   constexpr size_t cmds_count = 2;
-  using cmd_t = void(*)(std::ostream & os, std::istream &);
-  cmd_t cmds[cmds_count] = {hi, hello};
-  const char * const cmds_text[] = {"hi", "hello"};
+  using cmd_t = void(*)(std::ostream & os, std::istream &, size_t & context);
+  cmd_t cmds[cmds_count] = {next, last};
+  const char * const cmds_text[] = {"next", "last"};
+
+  size_t context = 0;
 
   constexpr size_t bcapacity = 255;
   char word[bcapacity + 1] = {};
@@ -96,11 +99,11 @@ int main()
     {
       word[size - 1] = '\0';
       size_t i = match(word, cmds_text, cmds_count);
-      if ( i < cmds_count)
+      if (i < cmds_count)
       {
         try
         {
-          cmds[i](std::cout, std::cin);
+          cmds[i](std::cout, std::cin, context);
         }
         catch (const std::exception & e)
         {
